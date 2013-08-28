@@ -40,7 +40,7 @@ else
 
 	find . -type f -name "*.m*" -print > listOfFiles.txt
 
-	cat listOfFiles.txt |tr '\n' '\0' |xargs -0 grep -o "NSLocalizedString(@\".*\", @\".*\")" > output.txt
+	cat listOfFiles.txt |tr '\n' '\0' |xargs -0 grep -o "NSLocalizedString(@\".*\"\(,\|, *\)@\".*\")" > output.txt
 
 	# Next, get all locale strings folders.  If Localizable.strings found, append to existing file; otherwise, create a new one.
 
@@ -74,7 +74,7 @@ else
 
 			while read LINE
 			do
-                foundLocalizedString=$(echo "$LINE" | grep -o "NSLocalizedString(@\".*\", @\".*\")")
+                foundLocalizedString=$(echo "$LINE" | grep -o "NSLocalizedString(@\".*\"\(,\|, *\)@\".*\")")
 
                 foundKey=$(echo "$foundLocalizedString" | grep -o "(@\".*\"\(,\|, *\)")
 
