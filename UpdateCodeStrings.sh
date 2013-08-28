@@ -40,7 +40,7 @@ else
 
 	find . -type f -name "*.m*" -print > listOfFiles.txt
 
-	cat listOfFiles.txt |tr '\n' '\0' |xargs -0 grep -o "NSLocalizedString(@\"[[:alnum:]]*\", @\"[a-zA-Z0-9 !@#\$%\^&\*()\.,-\+']*\")" > output.txt
+	cat listOfFiles.txt |tr '\n' '\0' |xargs -0 grep -o "NSLocalizedString(@\".*\", @\".*\")" > output.txt
 
 	# Next, get all locale strings folders.  If Localizable.strings found, append to existing file; otherwise, create a new one.
 
@@ -74,19 +74,21 @@ else
 
 			while read LINE
 			do
-				foundLocalizedString=$(echo "$LINE" | grep -o "NSLocalizedString(@\"[[:alnum:]]*\", @\"[a-zA-Z0-9 !@#\$%\^&\*()\.,-\+']*\")")
+                foundLocalizedString=$(echo "$LINE" | grep -o "NSLocalizedString(@\".*\", @\".*\")")
 
-				foundKey=$(echo "$foundLocalizedString" | grep -o "(@\"[[:alnum:]]*\"")
-				keyStart="\""
-				finalKey=$(echo "$foundKey" | grep -o "$keyStart.*")
+                foundKey=$(echo "$foundLocalizedString" | grep -o "(@\".*\"\(,\|, *\)")
 
-				$(grep -q "$finalKey" $stringsFile)
+                keyStart="\""
+                finalKey=$(echo "$foundKey" | grep -o "$keyStart[^,]*")
+
+                $(grep -q "$finalKey" $stringsFile)
 
 				if [ $? -eq 1 ]; then
 					echo "****** key is New: $finalKey"
 
-					foundComment=$(echo "$foundLocalizedString" | grep -o "@\"[a-zA-Z0-9 !@#\$%\^&\*()\.,-\+']*\")")
-					commentStart="\""
+					foundComment=$(echo "$foundLocalizedString" | grep -o "\(,\|, *\)@\".*\")")
+
+                    commentStart="\""
 					intermediateComment=$(echo "$foundComment" | grep -o "$commentStart.*")
 
 					finalComment=$(echo "$intermediateComment" | sed "s/)//")
